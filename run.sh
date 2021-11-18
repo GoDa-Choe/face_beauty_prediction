@@ -1,7 +1,11 @@
 #!/bin/bash
-echo "Start Experiment: resnet18_MAE_detection"
-python train_detection.py
-echo "Start Experiment: resnext50_MAE_detection"
-python train_detection_resnext50.py
+echo "MobileNet V2 Man"
+python train_mobilenetv2_man.py
+
+echo "MobileNet V3 Large Man"
+python train_mobilenetv3large_man.py
+
+echo "MobileNet V3 Small Man"
+python train_mobilenetv3small_man.py
 
 
