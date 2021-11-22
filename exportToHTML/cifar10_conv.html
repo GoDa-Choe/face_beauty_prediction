@@ -1,0 +1,111 @@
+<html>
+<head>
+<title>hw07_2.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #6a8759;}
+.s3 { color: #6897bb;}
+.s4 { color: #808080;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+hw07_2.py</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">torch</span>
+<span class="s0">import </span><span class="s1">torchvision</span>
+<span class="s0">import </span><span class="s1">torchvision.transforms </span><span class="s0">as </span><span class="s1">transforms</span>
+<span class="s0">import </span><span class="s1">torch.optim </span><span class="s0">as </span><span class="s1">optim</span>
+
+<span class="s1">DEVICE = torch.device(</span><span class="s2">'cuda'</span><span class="s1">) </span><span class="s0">if </span><span class="s1">torch.cuda.is_available() </span><span class="s0">else </span><span class="s1">torch.device(</span><span class="s2">'cpu'</span><span class="s1">)</span>
+
+<span class="s1">transform = transforms.Compose(</span>
+    <span class="s1">[transforms.ToTensor()</span><span class="s0">,</span>
+     <span class="s1">transforms.Normalize((</span><span class="s3">0.5</span><span class="s0">, </span><span class="s3">0.5</span><span class="s0">, </span><span class="s3">0.5</span><span class="s1">)</span><span class="s0">, </span><span class="s1">(</span><span class="s3">0.5</span><span class="s0">, </span><span class="s3">0.5</span><span class="s0">, </span><span class="s3">0.5</span><span class="s1">))])</span>
+
+<span class="s1">batch_size = </span><span class="s3">16</span>
+
+<span class="s1">trainset = torchvision.datasets.CIFAR10(root=</span><span class="s2">'./data'</span><span class="s0">, </span><span class="s1">train=</span><span class="s0">True,</span>
+                                        <span class="s1">download=</span><span class="s0">True, </span><span class="s1">transform=transform)</span>
+<span class="s1">trainloader = torch.utils.data.DataLoader(trainset</span><span class="s0">, </span><span class="s1">batch_size=batch_size</span><span class="s0">,</span>
+                                          <span class="s1">shuffle=</span><span class="s0">True, </span><span class="s1">num_workers=</span><span class="s3">16</span><span class="s1">)</span>
+
+<span class="s1">testset = torchvision.datasets.CIFAR10(root=</span><span class="s2">'./data'</span><span class="s0">, </span><span class="s1">train=</span><span class="s0">False,</span>
+                                       <span class="s1">download=</span><span class="s0">True, </span><span class="s1">transform=transform)</span>
+<span class="s1">testloader = torch.utils.data.DataLoader(testset</span><span class="s0">, </span><span class="s1">batch_size=batch_size</span><span class="s0">,</span>
+                                         <span class="s1">shuffle=</span><span class="s0">False, </span><span class="s1">num_workers=</span><span class="s3">16</span><span class="s1">)</span>
+
+<span class="s1">classes = (</span><span class="s2">'plane'</span><span class="s0">, </span><span class="s2">'car'</span><span class="s0">, </span><span class="s2">'bird'</span><span class="s0">, </span><span class="s2">'cat'</span><span class="s0">,</span>
+           <span class="s2">'deer'</span><span class="s0">, </span><span class="s2">'dog'</span><span class="s0">, </span><span class="s2">'frog'</span><span class="s0">, </span><span class="s2">'horse'</span><span class="s0">, </span><span class="s2">'ship'</span><span class="s0">, </span><span class="s2">'truck'</span><span class="s1">)</span>
+
+<span class="s0">import </span><span class="s1">torch.nn </span><span class="s0">as </span><span class="s1">nn</span>
+<span class="s0">import </span><span class="s1">torch.nn.functional </span><span class="s0">as </span><span class="s1">F</span>
+
+
+<span class="s0">class </span><span class="s1">Net(nn.Module):</span>
+    <span class="s0">def </span><span class="s1">__init__(self):</span>
+        <span class="s1">super().__init__()</span>
+        <span class="s1">self.conv1 = nn.Conv2d(</span><span class="s3">3</span><span class="s0">, </span><span class="s3">6</span><span class="s0">, </span><span class="s3">5</span><span class="s1">)</span>
+        <span class="s1">self.pool = nn.MaxPool2d(</span><span class="s3">2</span><span class="s0">, </span><span class="s3">2</span><span class="s1">)</span>
+        <span class="s1">self.conv2 = nn.Conv2d(</span><span class="s3">6</span><span class="s0">, </span><span class="s3">16</span><span class="s0">, </span><span class="s3">5</span><span class="s1">)</span>
+        <span class="s1">self.fc1 = nn.Linear(</span><span class="s3">16 </span><span class="s1">* </span><span class="s3">5 </span><span class="s1">* </span><span class="s3">5</span><span class="s0">, </span><span class="s3">120</span><span class="s1">)</span>
+        <span class="s1">self.fc2 = nn.Linear(</span><span class="s3">120</span><span class="s0">, </span><span class="s3">84</span><span class="s1">)</span>
+        <span class="s1">self.fc3 = nn.Linear(</span><span class="s3">84</span><span class="s0">, </span><span class="s3">10</span><span class="s1">)</span>
+
+    <span class="s0">def </span><span class="s1">forward(self</span><span class="s0">, </span><span class="s1">x):</span>
+        <span class="s1">x = self.pool(F.relu(self.conv1(x)))</span>
+        <span class="s1">x = self.pool(F.relu(self.conv2(x)))</span>
+        <span class="s1">x = torch.flatten(x</span><span class="s0">, </span><span class="s3">1</span><span class="s1">)  </span><span class="s4"># flatten all dimensions except batch</span>
+        <span class="s1">x = F.relu(self.fc1(x))</span>
+        <span class="s1">x = F.relu(self.fc2(x))</span>
+        <span class="s1">x = self.fc3(x)</span>
+        <span class="s0">return </span><span class="s1">x</span>
+
+
+<span class="s1">net = Net()</span>
+<span class="s1">net.to(device=DEVICE)</span>
+
+<span class="s1">criterion = nn.CrossEntropyLoss()</span>
+<span class="s1">optimizer = optim.SGD(net.parameters()</span><span class="s0">, </span><span class="s1">lr=</span><span class="s3">0.001</span><span class="s0">, </span><span class="s1">momentum=</span><span class="s3">0.9</span><span class="s1">)</span>
+
+<span class="s0">for </span><span class="s1">epoch </span><span class="s0">in </span><span class="s1">range(</span><span class="s3">50</span><span class="s1">):</span>
+
+    <span class="s1">running_loss = </span><span class="s3">0.0</span>
+    <span class="s0">for </span><span class="s1">i</span><span class="s0">, </span><span class="s1">data </span><span class="s0">in </span><span class="s1">enumerate(trainloader</span><span class="s0">, </span><span class="s3">0</span><span class="s1">):</span>
+        <span class="s1">inputs</span><span class="s0">, </span><span class="s1">labels = data[</span><span class="s3">0</span><span class="s1">].to(DEVICE)</span><span class="s0">, </span><span class="s1">data[</span><span class="s3">1</span><span class="s1">].to(DEVICE)</span>
+
+        <span class="s1">optimizer.zero_grad()</span>
+
+        <span class="s1">outputs = net(inputs)</span>
+        <span class="s1">loss = criterion(outputs</span><span class="s0">, </span><span class="s1">labels)</span>
+        <span class="s1">loss.backward()</span>
+        <span class="s1">optimizer.step()</span>
+
+        <span class="s1">running_loss += loss.item()</span>
+        <span class="s0">if </span><span class="s1">i % </span><span class="s3">1000 </span><span class="s1">== </span><span class="s3">999</span><span class="s1">:</span>
+            <span class="s1">print(</span><span class="s2">'[%d, %5d] loss: %.3f' </span><span class="s1">%</span>
+                  <span class="s1">(epoch + </span><span class="s3">1</span><span class="s0">, </span><span class="s1">i + </span><span class="s3">1</span><span class="s0">, </span><span class="s1">running_loss / </span><span class="s3">2000</span><span class="s1">))</span>
+            <span class="s1">running_loss = </span><span class="s3">0.0</span>
+
+<span class="s4"># for test</span>
+<span class="s1">correct = </span><span class="s3">0</span>
+<span class="s1">total = </span><span class="s3">0</span>
+<span class="s0">with </span><span class="s1">torch.no_grad():</span>
+    <span class="s0">for </span><span class="s1">data </span><span class="s0">in </span><span class="s1">testloader:</span>
+        <span class="s1">inputs</span><span class="s0">, </span><span class="s1">labels = data[</span><span class="s3">0</span><span class="s1">].to(DEVICE)</span><span class="s0">, </span><span class="s1">data[</span><span class="s3">1</span><span class="s1">].to(DEVICE)</span>
+
+        <span class="s1">outputs = net(inputs)</span>
+
+        <span class="s1">_</span><span class="s0">, </span><span class="s1">predicted = torch.max(outputs.data</span><span class="s0">, </span><span class="s3">1</span><span class="s1">)</span>
+        <span class="s1">total += labels.size(</span><span class="s3">0</span><span class="s1">)</span>
+        <span class="s1">correct += (predicted == labels).sum().item()</span>
+
+<span class="s1">print(</span><span class="s2">'Accuracy of the network on the 10000 test images: %d %%' </span><span class="s1">% (</span>
+        <span class="s3">100 </span><span class="s1">* correct / total))</span>
+</pre>
+</body>
+</html>

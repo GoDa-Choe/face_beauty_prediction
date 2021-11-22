@@ -1,0 +1,95 @@
+<html>
+<head>
+<title>hw07.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #6a8759;}
+.s3 { color: #6897bb;}
+.s4 { color: #808080;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+hw07.py</font>
+</center></td></tr></table>
+<pre><span class="s0">from </span><span class="s1">torch </span><span class="s0">import </span><span class="s1">nn</span><span class="s0">, </span><span class="s1">optim</span><span class="s0">, </span><span class="s1">from_numpy</span>
+
+<span class="s0">import </span><span class="s1">numpy </span><span class="s0">as </span><span class="s1">np</span>
+
+<span class="s1">xy = np.loadtxt(</span><span class="s2">'data/diabetes.csv.gz'</span><span class="s0">, </span><span class="s1">delimiter=</span><span class="s2">','</span><span class="s0">, </span><span class="s1">dtype=np.float32)</span>
+
+<span class="s1">x_data = from_numpy(xy[:</span><span class="s3">500</span><span class="s0">, </span><span class="s3">0</span><span class="s1">:-</span><span class="s3">1</span><span class="s1">])</span>
+<span class="s1">y_data = from_numpy(xy[:</span><span class="s3">500</span><span class="s0">, </span><span class="s1">[-</span><span class="s3">1</span><span class="s1">]])</span>
+
+<span class="s1">x_data_test = from_numpy(xy[</span><span class="s3">500</span><span class="s1">:</span><span class="s0">, </span><span class="s3">0</span><span class="s1">:-</span><span class="s3">1</span><span class="s1">])</span>
+<span class="s1">y_data_test = from_numpy(xy[</span><span class="s3">500</span><span class="s1">:</span><span class="s0">, </span><span class="s1">[-</span><span class="s3">1</span><span class="s1">]])</span>
+
+
+<span class="s0">class </span><span class="s1">Model(nn.Module):</span>
+
+    <span class="s0">def </span><span class="s1">__init__(self):</span>
+        <span class="s1">super(Model</span><span class="s0">, </span><span class="s1">self).__init__()</span>
+
+        <span class="s1">self.l1_2_3 = nn.Sequential(</span>
+            <span class="s1">nn.Linear(</span><span class="s3">8</span><span class="s0">, </span><span class="s3">8</span><span class="s1">)</span><span class="s0">,</span>
+            <span class="s1">nn.ReLU()</span><span class="s0">,</span>
+            <span class="s1">nn.Linear(</span><span class="s3">8</span><span class="s0">, </span><span class="s3">6</span><span class="s1">)</span><span class="s0">,</span>
+            <span class="s1">nn.ReLU()</span><span class="s0">,</span>
+            <span class="s1">nn.Linear(</span><span class="s3">6</span><span class="s0">, </span><span class="s3">6</span><span class="s1">)</span><span class="s0">,</span>
+            <span class="s1">nn.ReLU()</span>
+        <span class="s1">)</span>
+
+        <span class="s1">self.l4_5_6 = nn.Sequential(</span>
+            <span class="s1">nn.Linear(</span><span class="s3">6</span><span class="s0">, </span><span class="s3">6</span><span class="s1">)</span><span class="s0">,</span>
+            <span class="s1">nn.ReLU()</span><span class="s0">,</span>
+            <span class="s1">nn.Linear(</span><span class="s3">6</span><span class="s0">, </span><span class="s3">4</span><span class="s1">)</span><span class="s0">,</span>
+            <span class="s1">nn.ReLU()</span><span class="s0">,</span>
+            <span class="s1">nn.Linear(</span><span class="s3">4</span><span class="s0">, </span><span class="s3">4</span><span class="s1">)</span><span class="s0">,</span>
+            <span class="s1">nn.ReLU()</span><span class="s0">,</span>
+        <span class="s1">)</span>
+
+        <span class="s1">self.l7_8_9_10 = nn.Sequential(</span>
+            <span class="s1">nn.Linear(</span><span class="s3">4</span><span class="s0">, </span><span class="s3">4</span><span class="s1">)</span><span class="s0">,</span>
+            <span class="s1">nn.ReLU()</span><span class="s0">,</span>
+            <span class="s1">nn.Linear(</span><span class="s3">4</span><span class="s0">, </span><span class="s3">2</span><span class="s1">)</span><span class="s0">,</span>
+            <span class="s1">nn.ReLU()</span><span class="s0">,</span>
+            <span class="s1">nn.Linear(</span><span class="s3">2</span><span class="s0">, </span><span class="s3">2</span><span class="s1">)</span><span class="s0">,</span>
+            <span class="s1">nn.ReLU()</span><span class="s0">,</span>
+            <span class="s1">nn.Linear(</span><span class="s3">2</span><span class="s0">, </span><span class="s3">1</span><span class="s1">)</span><span class="s0">,</span>
+            <span class="s1">nn.ReLU()</span><span class="s0">,</span>
+        <span class="s1">)</span>
+
+    <span class="s0">def </span><span class="s1">forward(self</span><span class="s0">, </span><span class="s1">x):</span>
+        <span class="s1">x = self.l1_2_3(x)</span>
+        <span class="s1">x = self.l4_5_6(x)</span>
+        <span class="s1">x = self.l7_8_9_10(x)</span>
+
+        <span class="s0">return </span><span class="s1">x</span>
+
+
+<span class="s1">model = Model()</span>
+
+<span class="s1">criterion = nn.BCELoss(reduction=</span><span class="s2">&quot;mean&quot;</span><span class="s1">)</span>
+<span class="s1">optimizer = optim.SGD(model.parameters()</span><span class="s0">, </span><span class="s1">lr=</span><span class="s3">0.1</span><span class="s1">)</span>
+
+<span class="s0">for </span><span class="s1">epoch </span><span class="s0">in </span><span class="s1">range(</span><span class="s3">100</span><span class="s1">):</span>
+    <span class="s1">y_pred = model(x_data)</span>
+    <span class="s1">loss = criterion(y_pred</span><span class="s0">, </span><span class="s1">y_data)</span>
+    <span class="s1">optimizer.zero_grad()</span>
+    <span class="s1">loss.backward()</span>
+    <span class="s1">optimizer.step()</span>
+
+    <span class="s0">if </span><span class="s1">epoch == </span><span class="s3">99</span><span class="s1">:</span>
+        <span class="s1">print(</span><span class="s2">f&quot;</span><span class="s0">{</span><span class="s1">epoch + </span><span class="s3">1</span><span class="s0">} {</span><span class="s1">loss.item()</span><span class="s0">:</span><span class="s2">.4f</span><span class="s0">}</span><span class="s2">&quot;</span><span class="s1">)</span>
+
+<span class="s4"># for test</span>
+<span class="s1">test_y_pred = model(x_data_test)</span>
+<span class="s1">test_loss = criterion(test_y_pred</span><span class="s0">, </span><span class="s1">y_data_test)</span>
+<span class="s1">print(</span><span class="s2">f&quot;Test </span><span class="s0">{</span><span class="s1">test_loss.item()</span><span class="s0">:</span><span class="s2">.4f</span><span class="s0">}</span><span class="s2">&quot;</span><span class="s1">)</span>
+</pre>
+</body>
+</html>

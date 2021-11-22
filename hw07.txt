@@ -1,0 +1,15 @@
+# 10 layer sigmoid
+100 0.6524
+Test 0.6338
+
+# 10 layer ReLU
+100 0.6523
+Test 0.6328
+
+# 4 layer ReLU
+100 0.6322
+Test 0.6056
+
+# 3 layer ReLU
+100 0.6376
+Test 0.6116

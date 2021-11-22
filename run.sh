@@ -6,6 +6,7 @@ echo "MobileNet V3 Large Man"
 python train_mobilenetv3large_man.py
 
 echo "MobileNet V3 Small Man"
-python train_mobilenetv3small_man.py
+python train_mobilenetv3s
+TempTmall_man.py
 
 
